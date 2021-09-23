@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>.ms</title>
+<style>button {font-size: 12px; width: 20px; height: 20px; padding: 0px; }</style>
+<script>
+	let height = 22, lenght = 44, mines = 222, minesMap = [], sumsMap = [];
+
+	while (mines) { // Position mines
+		let h = Math.trunc(Math.random() * height) + 1;
+		let l = Math.trunc(Math.random() * lenght) + 1;
+
+		if (!minesMap[[h,l]]) { // Check if there isn't one already
+			minesMap[[h,l]] = 1;
+			mines--;
+		}
+	}
+
+	for (let i = 0; i < height + 2; i++) for (let j = 0; j < lenght + 2; j++) if (!minesMap[[i,j]]) minesMap[[i,j]] = 0;
+	
+	let table = document.createElement('table');
+	table.style = 'margin: auto;';
+
+	for (let i = 1; i < height + 1; i++) {
+		let tr = document.createElement('tr');
+		table.appendChild(tr);
+
+		for (let j = 1; j < lenght + 1; j++) {
+			sumsMap[[i,j]] =
+				minesMap[[i-1,j-1]] + minesMap[[i-1,j]] + minesMap[[i-1,j+1]] +
+				minesMap[[i  ,j-1]] + /*             */   minesMap[[i  ,j+1]] +
+				minesMap[[i+1,j-1]] + minesMap[[i+1,j]] + minesMap[[i+1,j+1]];
+			
+			let td = document.createElement('td');
+			tr.appendChild(td);
+			let button = document.createElement('button');
+			//button.h = i;
+			//button.l = j;
+			button.textContent = '\u00A0';
+			button.id = [i,j];
+			td.appendChild(button);
+
+			//open(button.h, button.l);
+			
+			button.onclick = () => {
+				button.textContent = (minesMap[button.id]) ? '\uD83D\uDCA3' : sumsMap[button.id];
+				
+				if (!sumsMap[button.id]) { // if it's a 0
+					// open buttons around it, unless it's a mine
+				}
+			
+			}
+			
+			button.oncontextmenu = () => {
+				button.textContent = (button.textContent === '\u00A0') ? '\uD83D\uDEA9' : '\u00A0';
+				return false;
+			}
+			
+		}
+	}
+	
+	window.onload = () => { document.body.appendChild(table); }
+</script>
