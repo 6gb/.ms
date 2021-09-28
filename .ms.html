@@ -4,14 +4,7 @@
 <title>.ms</title>
 <style>button {font-size: 12px; width: 20px; height: 20px; padding: 0px; }</style>
 <script>
-	/*
-	
-		NEXT TO-DOS:
-	-	Add initial form to choose height, lenght & amount of mines
-	-	Edit rightClick function to differentiate clicks in unclicked buttons and flags from clicks in sums,
-		then open surrounding blocks if the amount of flags around the clicked block equals its sum.
-	
-	*/
+	const NBSP = '\u00A0', FLAG = '\uD83D\uDEA9', MINE = '\uD83D\uDCA3';
 
 	let height = 22, lenght = 44, mines = 222, blocks = [];
 
@@ -20,7 +13,10 @@
 	function start() {
 		for (let i = 0; i < height; i++) {
 			let row = [];
-			for (let j = 0; j < lenght; j++) row.push({ mine: false, sum: 0 });
+
+			for (let j = 0; j < lenght; j++)
+				row.push({ clicked: false, mine: false, sum: 0 });
+			
 			blocks.push(row);
 		}
 		
@@ -42,24 +38,17 @@
 			table.appendChild(tr);
 
 			for (let j = 0; j < lenght; j++) {
-				for (let ii = -1; ii < 2; ii++) {
-					for (let jj = -1; jj < 2; jj++) {
-						if (i + ii >= 0 &&
-							j + jj >= 0 &&
-							i + ii < height &&
-							j + jj < lenght &&
-							(ii !== 0 || jj !== 0) &&
-							blocks[i + ii][j + jj].mine
-						) blocks[i][j].sum++;
-					}
-				}
+				for (let block of surroundings(i, j))
+					if (blocks[block.row][block.col].mine)
+						blocks[i][j].sum++;
 				
 				let td = document.createElement('td');
 				tr.appendChild(td);
 				
 				blocks[i][j]['button'] = document.createElement('button');
-				blocks[i][j].button.textContent = '\u00A0';
+				blocks[i][j].button.textContent = NBSP;
 				blocks[i][j].button.onclick = () => leftClick(i, j);
+				
 				blocks[i][j].button.oncontextmenu = () => {
 					rightClick(i, j);
 					return false;
@@ -73,26 +62,45 @@
 	}
 
 	function leftClick(i, j) {
-		if (blocks[i][j].button.textContent === '\u00A0') {
-			blocks[i][j].button.textContent = (blocks[i][j].mine) ? '\uD83D\uDCA3' : blocks[i][j].sum;
+		if (blocks[i][j].button.textContent === NBSP) {
+			blocks[i][j].button.textContent = (blocks[i][j].mine) ? MINE : blocks[i][j].sum;
 
-			if (blocks[i][j].sum === 0 && !blocks[i][j].mine) {
-				for (let ii = -1; ii < 2; ii++) {
-					for (let jj = -1; jj < 2; jj++) {
-						if (i + ii >= 0 &&
-							j + jj >= 0 &&
-							i + ii < height &&
-							j + jj < lenght &&
-							(ii !== 0 || jj !== 0) &&
-							!blocks[i + ii][j + jj].mine
-						) leftClick(i + ii, j + jj);
-					}
-				}
+			if (blocks[i][j].mine) {
+				alert('\u2620    Click ok to restart    \u2620');
+				location.reload();
 			}
+
+			if (blocks[i][j].sum === 0 && !blocks[i][j].mine)
+				for (let block of surroundings(i, j))
+					if (!blocks[block.row][block.col].mine)
+						leftClick(block.row, block.col);
 		}
 	}
 
 	function rightClick(i, j) {
-		blocks[i][j].button.textContent = (blocks[i][j].button.textContent === '\u00A0') ? '\uD83D\uDEA9' : '\u00A0';
+		if (blocks[i][j].button.textContent !== NBSP && blocks[i][j].button.textContent !== FLAG) {
+			let checkFlagsMines = 0;
+
+			for (let block of surroundings(i, j))
+				if (blocks[block.row][block.col].button.textContent === FLAG)
+					checkFlagsMines++;
+
+			if (checkFlagsMines === blocks[i][j].sum)
+				for (let block of surroundings(i, j))
+					leftClick(block.row, block.col);
+			
+		} else
+			blocks[i][j].button.textContent = (blocks[i][j].button.textContent === NBSP) ? FLAG : NBSP;
+	}
+
+	function surroundings(i, j) {
+		let surroundingBlocks = [];
+		
+		for (let ii = -1; ii < 2; ii++)
+			for (let jj = -1; jj < 2; jj++)
+				if (i + ii >= 0 && j + jj >= 0 && i + ii < height && j + jj < lenght && (ii !== 0 || jj !== 0))
+					surroundingBlocks.push({row: i + ii, col: j + jj});
+
+		return surroundingBlocks;
 	}
 </script>
