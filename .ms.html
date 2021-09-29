@@ -13,18 +13,17 @@
 	<input type="number" name="length" id="length" />
 	<label for="mines">Mines</label>
 	<input type="number" name="mines" id="mines" />
-	<input type="button" onclick="start()" value="Start">
+	<input type="button" onclick="setTable()" value="Start">
 </form>
 <script>
 	const NBSP = "\u00A0", FLAG = "\uD83D\uDEA9", MINE = "\uD83D\uDCA3"
 
 	let height, length, mines, endCounter, blocks = []
 
-	function start() {
-		var form = document.getElementById("form")
-		
-		height = form.height.value, length = form.length.value, mines = form.mines.value
-
+	function setTable() {
+		height = document.getElementById("form").height.value
+		length = document.getElementById("form").length.value
+		mines = document.getElementById("form").mines.value
 		endCounter = height * length - mines
 
 		if (endCounter <= 0) {
@@ -41,15 +40,6 @@
 			
 			blocks.push(row)
 		}
-		
-		while (mines) {
-			let h = Math.floor(Math.random() * height), l = Math.floor(Math.random() * length)
-
-			if (!blocks[h][l].mine) {
-				blocks[h][l].mine = true
-				mines--
-			}
-		}
 
 		let table = document.createElement("table")
 		table.style = "margin: auto;"
@@ -59,16 +49,12 @@
 			table.appendChild(tr)
 
 			for (let j = 0; j < length; j++) {
-				for (let block of surroundings(i, j))
-					if (blocks[block.row][block.col].mine)
-						blocks[i][j].sum++
-				
 				let td = document.createElement("td")
 				tr.appendChild(td)
 				
 				blocks[i][j]["button"] = document.createElement("button")
 				blocks[i][j].button.textContent = NBSP
-				blocks[i][j].button.style = colorPicker(blocks[i][j].sum) + "background-color: #CCCA;"
+				blocks[i][j].button.style = "background-color: #CCCA;"
 
 				blocks[i][j].button.onclick = () => leftClick(i, j)
 				
@@ -84,17 +70,33 @@
 		document.body.appendChild(table)
 	}
 
+	function firstClick(row, col) {
+		while (mines) {
+			let h = Math.floor(Math.random() * height), l = Math.floor(Math.random() * length)
+
+			if (!blocks[h][l].mine && h !== row && l !== col) {
+				blocks[h][l].mine = true
+				mines--
+
+				for (let block of surroundings(h, l))
+					blocks[block.row][block.col].sum++
+			}
+		}
+	}
+
 	function leftClick(row, col) {
 		if (blocks[row][col].button.textContent === NBSP) {
-			blocks[row][col].button.textContent = (blocks[row][col].mine) ? MINE : blocks[row][col].sum
-			blocks[row][col].button.style =
-				(blocks[row][col].mine ? "background-color: red;" : "background-color: silver;") +
-				colorPicker(blocks[row][col].sum)
+			if (endCounter === height * length - mines)
+				firstClick(row, col)
 
 			if (blocks[row][col].mine) {
+				blocks[row][col].button.textContent = MINE
+				blocks[row][col].button.style = colorPicker(blocks[row][col].sum) + "background-color: red;"
 				alert("\u2620    Click ok to restart    \u2620")
 				location.reload()
 			} else {
+				blocks[row][col].button.textContent = blocks[row][col].sum
+				blocks[row][col].button.style = colorPicker(blocks[row][col].sum) + "background-color: silver;"
 				endCounter--
 
 				if (!endCounter) {
