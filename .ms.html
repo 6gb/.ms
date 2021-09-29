@@ -2,105 +2,152 @@
 <html lang="en">
 <meta charset="utf-8">
 <title>.ms</title>
-<style>button {font-size: 12px; width: 20px; height: 20px; padding: 0px; }</style>
+<style>
+	body, input, button { font-size: 12px; font-family: monospace; font-weight: bold; }
+	button { width: 20px; height: 20px; padding: 0px; }
+</style>
+<form id="form" method="post">
+	<label for="height">Height</label>
+	<input type="number" name="height" id="height" />
+	<label for="length">Length</label>
+	<input type="number" name="length" id="length" />
+	<label for="mines">Mines</label>
+	<input type="number" name="mines" id="mines" />
+	<input type="button" onclick="start()" value="Start">
+</form>
 <script>
-	const NBSP = '\u00A0', FLAG = '\uD83D\uDEA9', MINE = '\uD83D\uDCA3';
+	const NBSP = "\u00A0", FLAG = "\uD83D\uDEA9", MINE = "\uD83D\uDCA3"
 
-	let height = 22, lenght = 44, mines = 222, blocks = [];
-
-	window.onload = () => start();
+	let height, length, mines, endCounter, blocks = []
 
 	function start() {
+		var form = document.getElementById("form")
+		
+		height = form.height.value, length = form.length.value, mines = form.mines.value
+
+		endCounter = height * length - mines
+
+		if (endCounter <= 0) {
+			alert("This configuration is not possible.\nIncrease height and/or length or decrease amount of mines.")
+			return false
+		} else
+			document.getElementById("form").remove()
+
 		for (let i = 0; i < height; i++) {
 			let row = [];
 
-			for (let j = 0; j < lenght; j++)
-				row.push({ clicked: false, mine: false, sum: 0 });
+			for (let j = 0; j < length; j++)
+				row.push({ mine: false, sum: 0 })
 			
-			blocks.push(row);
+			blocks.push(row)
 		}
 		
 		while (mines) {
-			let i = Math.floor(Math.random() * height);
-			let j = Math.floor(Math.random() * lenght);
+			let h = Math.floor(Math.random() * height), l = Math.floor(Math.random() * length)
 
-			if (!blocks[i][j].mine) {
-				blocks[i][j].mine = true;
-				mines--;
+			if (!blocks[h][l].mine) {
+				blocks[h][l].mine = true
+				mines--
 			}
 		}
-		
-		let table = document.createElement('table');
-		table.style = 'margin: auto;';
+
+		let table = document.createElement("table")
+		table.style = "margin: auto;"
 
 		for (let i = 0; i < height; i++) {
-			let tr = document.createElement('tr');
-			table.appendChild(tr);
+			let tr = document.createElement("tr")
+			table.appendChild(tr)
 
-			for (let j = 0; j < lenght; j++) {
+			for (let j = 0; j < length; j++) {
 				for (let block of surroundings(i, j))
 					if (blocks[block.row][block.col].mine)
-						blocks[i][j].sum++;
+						blocks[i][j].sum++
 				
-				let td = document.createElement('td');
-				tr.appendChild(td);
+				let td = document.createElement("td")
+				tr.appendChild(td)
 				
-				blocks[i][j]['button'] = document.createElement('button');
-				blocks[i][j].button.textContent = NBSP;
-				blocks[i][j].button.onclick = () => leftClick(i, j);
+				blocks[i][j]["button"] = document.createElement("button")
+				blocks[i][j].button.textContent = NBSP
+				blocks[i][j].button.style = colorPicker(blocks[i][j].sum) + "background-color: #CCCA;"
+
+				blocks[i][j].button.onclick = () => leftClick(i, j)
 				
 				blocks[i][j].button.oncontextmenu = () => {
-					rightClick(i, j);
-					return false;
+					rightClick(i, j)
+					return false
 				}
 
-				td.appendChild(blocks[i][j].button);
+				td.appendChild(blocks[i][j].button)
 			}
 		}
 
-		document.body.appendChild(table);
+		document.body.appendChild(table)
 	}
 
-	function leftClick(i, j) {
-		if (blocks[i][j].button.textContent === NBSP) {
-			blocks[i][j].button.textContent = (blocks[i][j].mine) ? MINE : blocks[i][j].sum;
+	function leftClick(row, col) {
+		if (blocks[row][col].button.textContent === NBSP) {
+			blocks[row][col].button.textContent = (blocks[row][col].mine) ? MINE : blocks[row][col].sum
+			blocks[row][col].button.style =
+				(blocks[row][col].mine ? "background-color: red;" : "background-color: silver;") +
+				colorPicker(blocks[row][col].sum)
 
-			if (blocks[i][j].mine) {
-				alert('\u2620    Click ok to restart    \u2620');
-				location.reload();
+			if (blocks[row][col].mine) {
+				alert("\u2620    Click ok to restart    \u2620")
+				location.reload()
+			} else {
+				endCounter--
+
+				if (!endCounter) {
+					alert("\uD83D\uDE0E    Click ok to play again    \uD83D\uDE0E")
+					location.reload()
+				}
 			}
 
-			if (blocks[i][j].sum === 0 && !blocks[i][j].mine)
-				for (let block of surroundings(i, j))
+			if (blocks[row][col].sum === 0 && !blocks[row][col].mine)
+				for (let block of surroundings(row, col))
 					if (!blocks[block.row][block.col].mine)
-						leftClick(block.row, block.col);
+						leftClick(block.row, block.col)
 		}
 	}
 
-	function rightClick(i, j) {
-		if (blocks[i][j].button.textContent !== NBSP && blocks[i][j].button.textContent !== FLAG) {
-			let checkFlagsMines = 0;
+	function rightClick(row, col) {
+		if (blocks[row][col].button.textContent !== NBSP && blocks[row][col].button.textContent !== FLAG) {
+			let checkFlagsMines = 0
 
-			for (let block of surroundings(i, j))
+			for (let block of surroundings(row, col))
 				if (blocks[block.row][block.col].button.textContent === FLAG)
-					checkFlagsMines++;
+					checkFlagsMines++
 
-			if (checkFlagsMines === blocks[i][j].sum)
-				for (let block of surroundings(i, j))
-					leftClick(block.row, block.col);
+			if (checkFlagsMines === blocks[row][col].sum)
+				for (let block of surroundings(row, col))
+					leftClick(block.row, block.col)
 			
 		} else
-			blocks[i][j].button.textContent = (blocks[i][j].button.textContent === NBSP) ? FLAG : NBSP;
+			blocks[row][col].button.textContent = (blocks[row][col].button.textContent === NBSP) ? FLAG : NBSP
 	}
 
-	function surroundings(i, j) {
-		let surroundingBlocks = [];
+	function surroundings(row, col) {
+		let surroundingBlocks = []
 		
-		for (let ii = -1; ii < 2; ii++)
-			for (let jj = -1; jj < 2; jj++)
-				if (i + ii >= 0 && j + jj >= 0 && i + ii < height && j + jj < lenght && (ii !== 0 || jj !== 0))
-					surroundingBlocks.push({row: i + ii, col: j + jj});
+		for (let i = -1; i < 2; i++)
+			for (let j = -1; j < 2; j++)
+				if (row + i >= 0 && col + j >= 0 && row + i < height && col + j < length && (i !== 0 || j !== 0))
+					surroundingBlocks.push({ row: row + i, col: col + j })
 
-		return surroundingBlocks;
+		return surroundingBlocks
+	}
+
+	function colorPicker(number) {
+		switch(number) {
+			case 1: return "color: blue;"
+			case 2: return "color: green;"
+			case 3: return "color: red;"
+			case 4: return "color: navy;"
+			case 5: return "color: maroon;"
+			case 6: return "color: teal;"
+			case 7: return "color: black;"
+			case 8: return "color: gray;"
+			default: return "color: silver;"
+		}
 	}
 </script>
