@@ -1,20 +1,36 @@
 <!doctype html>
 <html lang="en">
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>.ms</title>
+<meta name="description" content="JavaScript Minesweeper">
 <style>
-	body, input, button { font-size: 12px; font-family: monospace; font-weight: bold; }
-	button { width: 20px; height: 20px; padding: 0px; }
+	body, input, button { font-size: 2.2vh; font-family: 'Courier New', Courier, monospace; font-weight: bold; color: black; }
+	button { width: 3.5vh; height: 3.5vh; padding: 0vh; }
+	body { display: flex; flex-direction: column; justify-content: center; min-height: 96vh; text-align: center; background-color: gray; }
+	header, main, footer { margin: auto; }
+	header, footer { padding: 1vh; }
+	input { margin-top: 0.1vh; margin-bottom: 0.1vh; }
+	.wt { color: white; }
 </style>
-<form id="form" method="post">
-	<label for="height">Height</label>
-	<input type="number" name="height" id="height" />
-	<label for="length">Length</label>
-	<input type="number" name="length" id="length" />
-	<label for="mines">Mines</label>
-	<input type="number" name="mines" id="mines" />
-	<input type="button" onclick="setTable()" value="Start">
-</form>
+<header>
+	<h1>
+		.<span class="wt">ms</span><br>
+		JavaScript<br>
+		<span class="wt">Minesweeper</span>
+	</h1>
+</header>
+<main id="main">
+	<form id="form" method="post">
+		<input type="number" name="height" id="height" placeholder="Height"/><br>
+		<input type="number" name="length" id="length" placeholder="Length"/><br>
+		<input type="number" name="mines" id="mines" placeholder="Mines"/><br>
+		<input type="button" onclick="setTable()" value="Start">
+	</form>
+</main>
+<footer>
+	<a href="https://github.com/6gb/.ms" class="wt" >GitHub</a>
+</footer>
 <script>
 	const NBSP = "\u00A0", FLAG = "\uD83D\uDEA9", MINE = "\uD83D\uDCA3"
 
@@ -54,7 +70,7 @@
 				
 				blocks[i][j]["button"] = document.createElement("button")
 				blocks[i][j].button.textContent = NBSP
-				blocks[i][j].button.style = "background-color: #CCCA;"
+				blocks[i][j].button.style = "background-color: #CCC !important;"
 
 				blocks[i][j].button.onclick = () => leftClick(i, j)
 				
@@ -67,7 +83,7 @@
 			}
 		}
 
-		document.body.appendChild(table)
+		document.getElementById("main").appendChild(table);
 	}
 
 	function firstClick(row, col) {
@@ -92,15 +108,15 @@
 			if (blocks[row][col].mine) {
 				blocks[row][col].button.textContent = MINE
 				blocks[row][col].button.style = colorPicker(blocks[row][col].sum) + "background-color: red;"
-				alert("\u2620    Click ok to restart    \u2620")
+				alert(":(    Click ok to restart    ):")
 				location.reload()
 			} else {
 				blocks[row][col].button.textContent = blocks[row][col].sum
-				blocks[row][col].button.style = colorPicker(blocks[row][col].sum) + "background-color: silver;"
+				blocks[row][col].button.style = colorPicker(blocks[row][col].sum) + "background-color: #999 !important;"
 				endCounter--
 
 				if (!endCounter) {
-					alert("\uD83D\uDE0E    Click ok to play again    \uD83D\uDE0E")
+					alert("(:    Click ok to play again    :)")
 					location.reload()
 				}
 			}
@@ -148,8 +164,8 @@
 			case 5: return "color: maroon;"
 			case 6: return "color: teal;"
 			case 7: return "color: black;"
-			case 8: return "color: gray;"
-			default: return "color: silver;"
+			case 8: return "color: silver;"
+			default: return "color: #999 !important;"
 		}
 	}
 </script>
