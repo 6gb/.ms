@@ -13,30 +13,55 @@
 	input { margin-top: 0.1vh; margin-bottom: 0.1vh; }
 	.wt { color: white; }
 </style>
-<header>
-	<h1>
-		.<span class="wt">ms</span><br>
-		JavaScript<br>
-		<span class="wt">Minesweeper</span>
-	</h1>
-</header>
-<main id="main">
-	<form id="form" method="post">
-		<input type="number" name="height" id="height" placeholder="Height"/><br>
-		<input type="number" name="length" id="length" placeholder="Length"/><br>
-		<input type="number" name="mines" id="mines" placeholder="Mines"/><br>
-		<input type="button" onclick="setTable()" value="Start">
-	</form>
-</main>
-<footer>
-	<a href="https://github.com/6gb/.ms" class="wt" >GitHub</a>
-</footer>
+<body onload="setForm(false)">
+	<header>
+		<h1>
+			.<span class="wt">ms</span><br>
+			JavaScript<br>
+			<span class="wt">Minesweeper</span>
+		</h1>
+	</header>
+	<main id="main"></main>
+	<footer><a href="https://github.com/6gb/.ms" class="wt">GitHub</a></footer>
+</body>
 <script>
 	const NBSP = "\u00A0", FLAG = "\uD83D\uDEA9", MINE = "\uD83D\uDCA3"
 
 	let height, length, mines, endCounter, blocks = []
+	
+	function setForm(notFirst) {
+		if (notFirst)
+			document.getElementById("table").remove()
 
-	function setTable() {
+		let form = document.createElement("form")
+		form.id = "form"
+		form.method = "post"
+
+		let inputs = [
+			document.createElement("input"),
+			document.createElement("input"),
+			document.createElement("input"),
+			document.createElement("input")
+		]
+
+		function addParams(input, params) { Object.keys(params).forEach(i => input.setAttribute(i, params[i])); }
+
+		console.log(height, length, mines)
+
+		addParams(inputs[0], { type: "number", name: "height", id: "height", placeholder: "Height", value: height})
+		addParams(inputs[1], { type: "number", name: "length", id: "length", placeholder: "Length", value: length })
+		addParams(inputs[2], { type: "number", name: "mines", id: "mines", placeholder: "Mines", value: mines })
+		addParams(inputs[3], { type: "button", onclick: "setTable()", value: "Start" })
+
+		for (let input of inputs) {
+			form.appendChild(input)
+			form.appendChild(document.createElement("br"))
+		}
+
+		document.getElementById("main").appendChild(form);
+	}
+
+	function setTable(form) {
 		height = document.getElementById("form").height.value
 		length = document.getElementById("form").length.value
 		mines = document.getElementById("form").mines.value
@@ -48,16 +73,21 @@
 		} else
 			document.getElementById("form").remove()
 
+		let bs = []
+
 		for (let i = 0; i < height; i++) {
 			let row = []
 
 			for (let j = 0; j < length; j++)
 				row.push({ mine: false, sum: 0 })
-			
-			blocks.push(row)
+
+			bs.push(row)
 		}
 
+		blocks = bs
+
 		let table = document.createElement("table")
+		table.id = "table"
 		table.style = "margin: auto;"
 
 		for (let i = 0; i < height; i++) {
@@ -67,13 +97,13 @@
 			for (let j = 0; j < length; j++) {
 				let td = document.createElement("td")
 				tr.appendChild(td)
-				
+
 				blocks[i][j]["button"] = document.createElement("button")
 				blocks[i][j].button.textContent = NBSP
 				blocks[i][j].button.style = "background-color: #CCC !important;"
 
 				blocks[i][j].button.onclick = () => leftClick(i, j)
-				
+
 				blocks[i][j].button.oncontextmenu = () => {
 					rightClick(i, j)
 					return false
@@ -87,12 +117,14 @@
 	}
 
 	function firstClick(row, col) {
-		while (mines) {
+		let ms = mines
+
+		while (ms) {
 			let h = Math.floor(Math.random() * height), l = Math.floor(Math.random() * length)
 
 			if (!blocks[h][l].mine && h !== row && l !== col) {
 				blocks[h][l].mine = true
-				mines--
+				ms--
 
 				for (let block of surroundings(h, l))
 					blocks[block.row][block.col].sum++
@@ -109,7 +141,7 @@
 				blocks[row][col].button.textContent = MINE
 				blocks[row][col].button.style = colorPicker(blocks[row][col].sum) + "background-color: red;"
 				alert(":(    Click ok to restart    ):")
-				location.reload()
+				setForm(true)
 			} else {
 				blocks[row][col].button.textContent = blocks[row][col].sum
 				blocks[row][col].button.style = colorPicker(blocks[row][col].sum) + "background-color: #999 !important;"
@@ -117,7 +149,7 @@
 
 				if (!endCounter) {
 					alert("(:    Click ok to play again    :)")
-					location.reload()
+					setForm(true)
 				}
 			}
 
@@ -139,14 +171,14 @@
 			if (checkFlagsMines === blocks[row][col].sum)
 				for (let block of surroundings(row, col))
 					leftClick(block.row, block.col)
-			
+
 		} else
 			blocks[row][col].button.textContent = (blocks[row][col].button.textContent === NBSP) ? FLAG : NBSP
 	}
 
 	function surroundings(row, col) {
 		let surroundingBlocks = []
-		
+
 		for (let i = -1; i < 2; i++)
 			for (let j = -1; j < 2; j++)
 				if (row + i >= 0 && col + j >= 0 && row + i < height && col + j < length && (i !== 0 || j !== 0))
@@ -154,7 +186,7 @@
 
 		return surroundingBlocks
 	}
-
+	
 	function colorPicker(number) {
 		switch(number) {
 			case 1: return "color: blue;"
