@@ -46,11 +46,9 @@
 
 		function addParams(input, params) { Object.keys(params).forEach(i => input.setAttribute(i, params[i])); }
 
-		console.log(height, length, mines)
-
-		addParams(inputs[0], { type: "number", name: "height", id: "height", placeholder: "Height", value: height})
-		addParams(inputs[1], { type: "number", name: "length", id: "length", placeholder: "Length", value: length })
-		addParams(inputs[2], { type: "number", name: "mines", id: "mines", placeholder: "Mines", value: mines })
+		addParams(inputs[0], { type: "number", name: "height", id: "height", placeholder: "Height", value: height, min: 1 })
+		addParams(inputs[1], { type: "number", name: "length", id: "length", placeholder: "Length", value: length, min: 1 })
+		addParams(inputs[2], { type: "number", name: "mines", id: "mines", placeholder: "Mines", value: mines, min: 1 })
 		addParams(inputs[3], { type: "button", onclick: "setTable()", value: "Start" })
 
 		for (let input of inputs) {
@@ -113,7 +111,18 @@
 			}
 		}
 
-		document.getElementById("main").appendChild(table);
+		let caption = document.createElement("caption")
+		
+		let flagCounter = document.createElement("flagCounter")
+		flagCounter.setAttribute("id", "flagCounter");
+		flagCounter.innerHTML = mines
+		
+		caption.appendChild(flagCounter)
+		caption.innerHTML += "\uD83D\uDEA9"
+		
+		table.appendChild(caption)
+
+		document.getElementById("main").appendChild(table)
 	}
 
 	function firstClick(row, col) {
@@ -172,8 +181,11 @@
 				for (let block of surroundings(row, col))
 					leftClick(block.row, block.col)
 
-		} else
+		} else {
+			(blocks[row][col].button.textContent === NBSP) ? document.getElementById("flagCounter").innerHTML-- : document.getElementById("flagCounter").innerHTML++
+			
 			blocks[row][col].button.textContent = (blocks[row][col].button.textContent === NBSP) ? FLAG : NBSP
+		}
 	}
 
 	function surroundings(row, col) {
