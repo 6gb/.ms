@@ -28,7 +28,7 @@
 	const NBSP = "\u00A0", FLAG = "\uD83D\uDEA9", MINE = "\uD83D\uDCA3"
 
 	let height, length, mines, endCounter, blocks = []
-	
+
 	function setForm(notFirst) {
 		if (notFirst)
 			document.getElementById("table").remove()
@@ -112,14 +112,14 @@
 		}
 
 		let caption = document.createElement("caption")
-		
+
 		let flagCounter = document.createElement("flagCounter")
 		flagCounter.setAttribute("id", "flagCounter");
 		flagCounter.innerHTML = mines
-		
+
 		caption.appendChild(flagCounter)
 		caption.innerHTML += "\uD83D\uDEA9"
-		
+
 		table.appendChild(caption)
 
 		document.getElementById("main").appendChild(table)
@@ -183,7 +183,7 @@
 
 		} else {
 			(blocks[row][col].button.textContent === NBSP) ? document.getElementById("flagCounter").innerHTML-- : document.getElementById("flagCounter").innerHTML++
-			
+
 			blocks[row][col].button.textContent = (blocks[row][col].button.textContent === NBSP) ? FLAG : NBSP
 		}
 	}
@@ -198,7 +198,7 @@
 
 		return surroundingBlocks
 	}
-	
+
 	function colorPicker(number) {
 		switch(number) {
 			case 1: return "color: blue;"
