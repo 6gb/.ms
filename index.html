@@ -131,7 +131,7 @@
 		while (ms) {
 			let h = Math.floor(Math.random() * height), l = Math.floor(Math.random() * length)
 
-			if (!blocks[h][l].mine && h !== row && l !== col) {
+			if (!blocks[h][l].mine && (h !== row || l !== col)) {
 				blocks[h][l].mine = true
 				ms--
 
