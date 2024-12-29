@@ -1,0 +1,19 @@
+body, input, button { font-size: 2.2vh; font-family: 'Courier New', Courier, monospace; font-weight: bold; }
+button { width: 3.5vh; height: 3.5vh; padding: 0vh; }
+body { display: flex; flex-direction: column; justify-content: center; min-height: 96vh; text-align: center; }
+header, main, footer { margin: auto; }
+header, footer { padding: 1vh; }
+input { margin-top: 0.1vh; margin-bottom: 0.1vh; }
+table { margin: auto }
+
+@media (prefers-color-scheme: dark) {
+	body { background-color: #555; }
+	.wt { color: #ddd; }
+	body, input, button { color: black; }
+}
+
+@media (prefers-color-scheme: light) {
+	body { background-color: gray; }
+	.wt { color: white; }
+	body, input, button { color: #333; }
+}
