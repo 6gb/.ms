@@ -96,10 +96,12 @@ function rightClick(button) {
     const hidden = button.textContent === NBSP, flagged = button.textContent === FLAG;
     let flagCounter = get("flagCounter");
     
+    if (hidden && !flagCounter.flagsLeft) return false;
+    
     if (hidden || flagged) {
         [flagCounter.textContent, button.textContent] = hidden
-            ? [flagCounter.flagsLeft--, FLAG]
-            : [flagCounter.flagsLeft++, NBSP];
+            ? [--flagCounter.flagsLeft, FLAG]
+            : [++flagCounter.flagsLeft, NBSP];
         return false;
     }
     
